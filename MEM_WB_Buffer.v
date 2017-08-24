@@ -19,41 +19,43 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-/*    MEM_WB_Buffer buffer_4(MEM_instruction, MEM_RegWrite, MEM_DataMemOut, MEM_hilowriteout, MEM_WriteReg, MEM_NoWrite, MEM_MemRead,
-                WB_instruction, WB_RegWrite, WB_DataMemOut, WB_hilowriteout, WB_WriteReg, WB_NoWrite, WB_MemRead, Clk,
-                MEM_stall, WB_stall);   */
+/*   MEM_WB_Buffer buffer_4(MEM_instruction, MEM_RegWrite, MEM_DataMemOut, MEM_hilowriteout, MEM_WriteReg, MEM_NoWrite, MEM_MemRead,
+                 WB_instruction, WB_RegWrite, WB_DataMemOut, WB_hilowriteout, WB_WriteReg, WB_NoWrite, WB_MemRead, Clk);  */
 
-module MEM_WB_Buffer(regWrite_in, dataMem_in, ALUoutput_in, writeReg_in, NoWrite_in, MemRead_in,
-                    regWrite_out, dataMem_out, ALUoutput_out, writeReg_out, NoWrite_out, MemRead_out, Clk,
-                    stall_in, stall_out);
+module MEM_WB_Buffer(instruction_in, regWrite_in, dataMem_in, ALUoutput_in, writeReg_in, NoWrite_in, MemRead_in,
+                    instruction_out, regWrite_out, dataMem_out, ALUoutput_out, writeReg_out, NoWrite_out, MemRead_out, Clk,
+                    IF_Stall_in, IF_Stall_out, PCounter_in, PCounter_out);
 
-input [31:0] dataMem_in, ALUoutput_in;
+input [31:0] dataMem_in, ALUoutput_in, instruction_in, PCounter_in;
 
 input [4:0] writeReg_in;
 
-input regWrite_in, Clk, NoWrite_in, MemRead_in, stall_in;
+input regWrite_in, Clk, NoWrite_in, MemRead_in, IF_Stall_in;
 
-output reg [31:0] ALUoutput_out, dataMem_out;
+output reg [31:0] ALUoutput_out, dataMem_out, instruction_out, PCounter_out;
 
 output reg [4:0] writeReg_out;
 
-output reg regWrite_out, NoWrite_out, MemRead_out, stall_out;
+output reg regWrite_out, NoWrite_out, MemRead_out, IF_Stall_out;
 
         initial begin
+            instruction_out = 0;
             ALUoutput_out = 0;
             dataMem_out = 0;
             writeReg_out =0;
             regWrite_out = 0;
             NoWrite_out = 0;
             MemRead_out = 0;
-            stall_out = 0;
+            IF_Stall_out = 0;
+            PCounter_out = 0;
         end        
 
     always@(posedge Clk) begin
     
+        instruction_out <= instruction_in;
         ALUoutput_out <= ALUoutput_in;
         dataMem_out <= dataMem_in;
-        stall_out <= stall_in;
+        IF_Stall_out <= IF_Stall_in;
         
         writeReg_out <= writeReg_in;
         
@@ -61,6 +63,7 @@ output reg regWrite_out, NoWrite_out, MemRead_out, stall_out;
         NoWrite_out <= NoWrite_in;
         MemRead_out <= MemRead_in;
         MemRead_out <= MemRead_in;
+        PCounter_out <= PCounter_in;
         
         end
 

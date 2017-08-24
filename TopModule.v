@@ -19,22 +19,22 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-/*    TopModule u0(.Clk(Clk), .Reset(Reset), .WB_output(WB_output), .IF_PCounter(IF_PCounter),
-             .WB_stall(WB_stall), .s1(s1), .s2(s2), .s3(s3), .s4(s4));*/
-module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
+
+module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_IF_Stall, IF_Stall, s1, s2, s3, s4);
 
     
     input  Clk, Reset;
 
 
     wire  zero;
-    wire  nowrite;  
+    wire  nowrite;
     //////////////////////////////////////////////////////////////////
     //Instruction Fetch Stage Wires
     wire [31:0] IF_instruction;
     output wire [31:0] IF_PCounter;
     
     wire IF_ID_Flush, writeRA;
+    output wire IF_Stall;
     //////////////////////////////////////////////////////////////////
     
     
@@ -42,8 +42,7 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     //Decode Stage Wires
     wire [31:0] ID_instruction, ID_PCounter, ID_ReadData1, ID_ReadData2;
     wire [31:0] ID_SignExtend16Out, ID_SignExtend5Out;
-    //output wire [31:0] v0, v1;
-    output wire [31:0] v0, v1;
+    output wire [31:0] s1, s2, s3, s4;
     
     wire [15:0] ID_JumpAmount;
     
@@ -51,7 +50,7 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     
     wire ID_hilowrite, ID_hilo, ID_ALUSrc, ID_MemRead, ID_MemWrite,
          ID_RegDst, ID_RegWrite, ID_Shift, ID_RegWriteFlush, ID_MemWriteFlush;
-    wire branch, jumpRegister;
+    wire branch, jumpRegister, ID_IF_Stall;
     //////////////////////////////////////////////////////////////////
     
     
@@ -74,7 +73,7 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
          EX_RegDst, EX_RegWrite, EX_Shift, ID_EX_Flush,
          EX_NoWrite, EX_WriteDataSel;
          
-    wire EX_RegWriteFlush, EX_MemWriteFlush, EX_Flush;
+    wire EX_RegWriteFlush, EX_MemWriteFlush, EX_Flush, EX_IF_Stall;
     //////////////////////////////////////////////////////////////////
     
     
@@ -85,18 +84,19 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
                 
     wire [4:0] MEM_WriteReg;
     
-    wire MEM_RegWrite, MEM_NoWrite, MEM_MemWrite, MEM_MemRead, MEM_WriteDataSel;
+    wire MEM_RegWrite, MEM_NoWrite, MEM_MemWrite, MEM_MemRead, MEM_WriteDataSel, MEM_IF_Stall;
     //////////////////////////////////////////////////////////////////
     
 
     //////////////////////////////////////////////////////////////////    
     //Writeback Stage Wires
-    wire [31:0] WB_DataMemOut, WB_hilowriteout;
+    wire [31:0] WB_instruction, WB_DataMemOut, WB_hilowriteout;
     output wire [31:0] WB_output;
     
     wire [4:0] WB_WriteReg;
     
     wire WB_MemRead, WB_RegWrite, WB_NoWrite;
+    output wire WB_IF_Stall;
     //////////////////////////////////////////////////////////////////
     
     //////////////////////////////////////////////////////////////////
@@ -106,20 +106,16 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     //////////////////////////////////////////////////////////////////
     // Hazard Unit Wires
     //wire IF_ID_stall;    
-    wire stall, EX_stall, MEM_stall;
-    output wire WB_stall;
     
-    //module hazardDetection(IF_instruction, ID_instruction, EX_instruction, EX_RegWrite, stall, Clk); 
-    hazardDetection hazard_1(IF_instruction, ID_instruction, EX_instruction, EX_RegWrite, stall, Clk); 
     
     //Instruction Fetch Stage
     
     //module InstructionFetchUnit(Instruction, out, Register, jumpRegister, branch, jumpAmount, branchAmount, Reset, Clk);
-    InstructionFetchUnit IFU_1(IF_instruction, IF_PCounter, ID_ReadData1, jumpRegister, branch, EX_instruction[15:0], Reset, stall, Clk, writeRA);
+    InstructionFetchUnit IFU_1(IF_instruction, IF_PCounter, ID_ReadData1, jumpRegister, branch, EX_instruction[15:0], Reset, IF_Stall, Clk, writeRA);
 
     
     //module IF_ID_Buffer(instruction_in, instruction_out, PCounter_in, PCounter_out, flush, IF_Stall_in, IF_Stall_out, Clk);
-    IF_ID_Buffer Buffer_1(IF_instruction, ID_instruction, jumpRegister | branch, stall, Clk);
+    IF_ID_Buffer Buffer_1(IF_instruction, ID_instruction, jumpRegister|IF_ID_Flush|branch, IF_Stall, ID_IF_Stall, Clk);
 
     
     
@@ -131,7 +127,7 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     //hazardDetection HD(EX_instruction[31:26], ID_instruction[20:16], ID_instruction[15:11], EX_instruction[20:16], IF_ID_stall, EX_MemRead);
     
     //RegisterFile ResiterFile_1(Instruction[25:21], Instruction[20:16], regdstout, hilowriteout, regwrite, nowrite, Clk, readdata1, readdata2, writeRA, pccounter);
-    RegisterFile ResiterFile_1(ID_instruction[25:21], ID_instruction[20:16], WB_WriteReg, WB_output, WB_RegWrite, WB_NoWrite, Clk, ID_ReadData1, ID_ReadData2, v0, v1, writeRA, IF_PCounter);
+    RegisterFile ResiterFile_1(ID_instruction[25:21], ID_instruction[20:16], WB_WriteReg, WB_output, WB_RegWrite, WB_NoWrite, Clk, ID_ReadData1, ID_ReadData2, s1, s2, s3, s4, writeRA, IF_PCounter);
     
     
     //module Control(Op, Func, RegDst, Shift, ALUSrc, RegWrite, hilo, hi, lo , hiloWrite, ALUOp, jumpRA, jumpRegister, writeRA, MemRead, MemWrite);
@@ -158,11 +154,11 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
                          ID_hilowrite, ID_hilo, ID_ALUSrc, ID_MemRead, ID_MemWriteFlush, ID_RegDst, ID_RegWriteFlush, ID_Shift, Clk,
                          EX_instruction, EX_ReadData1, EX_ReadData2, EX_SignExtend16Out, EX_SignExtend5Out, EX_hi, EX_lo,
                          EX_hilowrite, EX_hilo, EX_ALUSrc, EX_MemRead, EX_MemWrite, EX_RegDst, EX_RegWrite, EX_Shift,
-                         ID_EX_Flush | branch, stall, EX_stall);
+                         ID_EX_Flush | branch, ID_IF_Stall, EX_IF_Stall);
                          
     //FLUSH MUXES                      
-    Mux1Bit2To1 flush_RegWrite_1(ID_RegWriteFlush, ID_RegWrite, 1'b0, branch|stall);
-    Mux1Bit2To1 flush_MemWrite_1(ID_MemWriteFlush, ID_MemWrite, 1'b0, branch|stall);
+    Mux1Bit2To1 flush_RegWrite_1(ID_RegWriteFlush, ID_RegWrite, 1'b0, branch);
+    Mux1Bit2To1 flush_MemWrite_1(ID_MemWriteFlush, ID_MemWrite, 1'b0, branch);
                          
                         
 
@@ -196,11 +192,11 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
                           EX_OPCode, MEM_OPCode, EX_ALUSrc, EX_Shift, MEM_WriteData, EX_WriteData);*/
     (*dont_touch = "true"*)forwardingUnit FU(EX_instruction[25:21], EX_instruction[20:16], MEM_instruction[20:16], MEM_WriteReg, WB_WriteReg,
                        MEM_RegWrite, WB_RegWrite, EX_ALUSrc, EX_Shift, EX_instruction[31:26], MEM_instruction[31:26],
-                       ALUSrc_Sel, Shift_Sel, MEM_WriteDataSel, EX_WriteDataSel, EX_MemWrite, MEM_MemWrite); /*synopsys attribute fpga_dont_touch "true" */
+                       ALUSrc_Sel, Shift_Sel, MEM_WriteDataSel, EX_WriteDataSel); /*synopsys attribute fpga_dont_touch "true" */
     
        //FLUSH MUXES
-    Mux1Bit2To1 flush_RegWrite_2(EX_RegWriteFlush, EX_RegWrite, 1'b0, branch);
-    Mux1Bit2To1 flush_MemWrite_2(EX_MemWriteFlush, EX_MemWrite, 1'b0, branch);
+    Mux1Bit2To1 flush_RegWrite_2(EX_RegWriteFlush, EX_RegWrite, 1'b0, branch|EX_IF_Stall);
+    Mux1Bit2To1 flush_MemWrite_2(EX_MemWriteFlush, EX_MemWrite, 1'b0, branch|EX_IF_Stall);
    
     
     
@@ -214,7 +210,7 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     EX_MEM_Buffer buffer_3(EX_instruction, EX_WriteData, EX_hilowriteout, EX_WriteReg, 
                            EX_RegWriteFlush, EX_NoWrite, EX_MemWriteFlush, EX_MemRead, Clk,
                            MEM_instruction, MEM_ReadData2, MEM_hilowriteout, MEM_WriteReg,
-                           MEM_RegWrite, MEM_NoWrite, MEM_MemWrite, MEM_MemRead, EX_stall, MEM_stall);
+                           MEM_RegWrite, MEM_NoWrite, MEM_MemWrite, MEM_MemRead, EX_IF_Stall, MEM_IF_Stall);
 
     //module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData, OppCode); 
 
@@ -229,9 +225,8 @@ module TopModule(Clk, Reset, WB_output, IF_PCounter, WB_stall, v0, v1);
     /*module MEM_WB_Buffer(regWrite_in, dataMem_in, ALUoutput_in, writeReg_in,
                        regWrite_out, dataMem_out, ALUoutput_out, writeReg_out, Clk);*/
     
-    MEM_WB_Buffer buffer_4(MEM_RegWrite, MEM_DataMemOut, MEM_hilowriteout, MEM_WriteReg, MEM_NoWrite, MEM_MemRead,
-                 WB_RegWrite, WB_DataMemOut, WB_hilowriteout, WB_WriteReg, WB_NoWrite, WB_MemRead, Clk,
-                 MEM_stall, WB_stall); 
+    MEM_WB_Buffer buffer_4(MEM_instruction, MEM_RegWrite, MEM_DataMemOut, MEM_hilowriteout, MEM_WriteReg, MEM_NoWrite, MEM_MemRead,
+                 WB_instruction, WB_RegWrite, WB_DataMemOut, WB_hilowriteout, WB_WriteReg, WB_NoWrite, WB_MemRead, Clk, MEM_IF_Stall, WB_IF_Stall); 
     
     
     Mux32Bit2To1 WB_mux(WB_output, WB_hilowriteout, WB_DataMemOut, WB_MemRead);

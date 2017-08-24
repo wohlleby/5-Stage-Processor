@@ -40,19 +40,19 @@
 module InstructionFetchUnit(Instruction, out, Register, jumpRegister, branch, branchAmount, Reset, stall, Clk, writeRA);
 
     
-    input  Clk, Reset, branch, jumpRegister, stall;
+    input  Clk, Reset, branch, jumpRegister;
     input [31:0] Register;
     input [15:0] branchAmount;
     output wire [31:0] Instruction, out;
     
-    output wire writeRA;
-    wire [31:0] Address, PCResult;
+    output wire stall, writeRA;
+    wire [31:0] Address, PCResult, lookAhead;
 
     //module ProgramCounter(Address, Register, PCResult, jumpAmount, jump, jumpRegister, branch, branchAmount, Reset, Clk, instruction, lookAhead, stall);
     //module ProgramCounter(Address, Register, PCResult, jumpAmount, jump, jumpRegister, branch, branchAmount, Reset, Clk);
-    ProgramCounter counter_1(Address, Register, PCResult, jumpRegister, branch, branchAmount, Reset, Clk, Instruction, writeRA, stall);   
+    ProgramCounter counter_1(Address, Register, PCResult, jumpRegister, branch, branchAmount, Reset, Clk, Instruction, lookAhead, stall, writeRA);   
        
-    InstructionMemory memory_1(PCResult, Instruction);
+    InstructionMemory memory_1(PCResult, Instruction, lookAhead);
    
     
     PCAdder adder_1(PCResult, Address);

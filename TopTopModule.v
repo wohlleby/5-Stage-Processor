@@ -26,16 +26,16 @@ input Clk, Reset, ClkReset;
 output [7:0] en_out;
 output[6:0] out7;
 
-wire [31:0] v0, v1;
+wire [31:0] memwriteout, pccounter;
 wire Clk_s;
 
 //module ClkDiv(Clk, Rst, ClkOut);
 ClkDiv ClkDiv_1(Clk, ClkReset, Clk_s);
 
 //module TopModule(Clk, Reset, memwriteout, pccounter);
-TopModule Top_1(Clk_s, Reset, v0, v1);
+TopModule Top_1(Clk_s, Reset, memwriteout, pccounter);
 
 //module Two4DigitDisplay(Clk, NumberA, NumberB, out7, en_out);
-Two4DigitDisplay Display_1(Clk, v0[7:0], v1[7:0], out7, en_out);
+Two4DigitDisplay Display_1(Clk, pccounter[7:0], memwriteout[7:0], out7, en_out);
 
 endmodule

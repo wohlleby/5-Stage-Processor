@@ -21,17 +21,18 @@
 
 /*synopsys attribute fpga_dont_touch "true" */
 module forwardingUnit(EX_Rs, EX_Rt, MEM_Rt, MEM_WriteReg, WB_WriteReg, MEM_RegWrite, WB_RegWrite, ALUSrcSelect, ShiftSelect,
-                      EX_OPCode, MEM_OPCode, EX_ALUSrc, EX_Shift, MEM_WriteData, EX_WriteData, EX_MemWrite, MEM_MemWrite);
+                      EX_OPCode, MEM_OPCode, EX_ALUSrc, EX_Shift, MEM_WriteData, EX_WriteData);
 
 /*synopsys attribute fpga_dont_touch "true" */
 
 input[5:0] MEM_OPCode, EX_OPCode;
 input [4:0]  EX_Rs, EX_Rt, MEM_Rt, MEM_WriteReg, WB_WriteReg;
 
-input MEM_RegWrite, WB_RegWrite, ALUSrcSelect, ShiftSelect, EX_MemWrite, MEM_MemWrite;
+input MEM_RegWrite, WB_RegWrite, ALUSrcSelect, ShiftSelect;
 output reg [1:0] EX_ALUSrc, EX_Shift;
 output reg MEM_WriteData, EX_WriteData; 
 
+reg [4:0] MEM_dependency, WB_dependency;
 
     always @(EX_Rs, EX_Rt, MEM_WriteReg, WB_WriteReg, MEM_RegWrite, WB_RegWrite, ALUSrcSelect, ShiftSelect, MEM_OPCode, MEM_Rt, EX_OPCode)begin
     
@@ -62,14 +63,14 @@ output reg MEM_WriteData, EX_WriteData;
             
             //forwarding back to write data
             //sw, sh,sb
-            if(MEM_MemWrite && WB_RegWrite && (MEM_OPCode == 6'b101011 || MEM_OPCode == 6'b101000 || MEM_OPCode == 6'b101001)) begin
+            if(WB_RegWrite && (MEM_OPCode == 6'b101011 || MEM_OPCode == 6'b101000 || MEM_OPCode == 6'b101001)) begin
             
                 if(MEM_Rt == WB_WriteReg)
                     MEM_WriteData <= 1;
                 
             end
             //sw, sh, sb
-            else if(EX_MemWrite && WB_RegWrite && (EX_OPCode == 6'b101011 || EX_OPCode == 6'b101000 || EX_OPCode == 6'b101001)) begin
+            else if(WB_RegWrite && (EX_OPCode == 6'b101011 || EX_OPCode == 6'b101000 || EX_OPCode == 6'b101001)) begin
             
                 if(EX_Rt == WB_WriteReg)
                     EX_WriteData <= 1;

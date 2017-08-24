@@ -20,13 +20,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 //IF_ID_Buffer Buffer_1(IF_instruction, ID_instruction, IF_PCounter, ID_PCounter, IF_ID_Flush | branch, Clk);
-module IF_ID_Buffer(instruction_in, instruction_out, flush, stall, Clk);
+module IF_ID_Buffer(instruction_in, instruction_out, flush, IF_Stall_in, IF_Stall_out, Clk);
 
     input [31:0] instruction_in;
     
-    input Clk, flush, stall;
+    input Clk, flush, IF_Stall_in;
     
     output reg [31:0] instruction_out;
+    output reg IF_Stall_out;
     
         initial begin
             instruction_out = 0;
@@ -34,18 +35,15 @@ module IF_ID_Buffer(instruction_in, instruction_out, flush, stall, Clk);
     
     always@(posedge Clk) begin
     
-        if(flush) begin
+        if(flush == 1'b1) begin
 
             instruction_out <= 0;
-        end
-        
-       if (stall) begin
-        
-           //do not update instruction
+            IF_Stall_out <= 0;
         end
         
         else begin
         
+            IF_Stall_out <= IF_Stall_in;
             instruction_out <= instruction_in;
 
         end

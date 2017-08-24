@@ -49,7 +49,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //    RegisterFile ResiterFile_1(Instruction[25:21], Instruction[20:16], regdstout, hilowriteout, regwrite, nowrite, Clk, readdata1, readdata2, writeRA, pccounter);
-module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, nowrite, Clk, ReadData1, ReadData2, v0, v1, writeRA, PCounter);
+module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, nowrite, Clk, ReadData1, ReadData2, s1, s2, s3, s4, writeRA, PCounter);
 
 	/* Please fill in the implementation here... */
 	input [4:0] ReadRegister1, ReadRegister2, WriteRegister;
@@ -60,7 +60,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
     
     integer i = 0;
     
-    output [31:0] v0, v1;
+    output [31:0] s1, s2, s3, s4;	
     output [31:0] ReadData1, ReadData2;
     
     initial begin
@@ -91,8 +91,10 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
        
    
    
-       assign v0 = register[2];
-       assign v1 = register[3];
+       assign s1 = register[17];
+       assign s2 = register[18];
+       assign s3 = register[19];
+       assign s4 = register[20];
    
     
 

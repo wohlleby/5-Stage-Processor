@@ -47,7 +47,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData, OppCode)
     input MemRead; 			// Control signal for memory read 
 
     
-    reg[31:0] memory [0:5000];
+    reg[31:0] memory [0:1024];
      
     output reg[31:0] ReadData; // Contents of memory location at Address
     integer i = 0;
@@ -55,33 +55,31 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData, OppCode)
    
     /* Please fill in the implementation here */
     initial begin
-         
-       memory[0] = 32'd4;
-    memory[1] = 32'd4;
-    memory[2] = 32'd2;
-    memory[3] = 32'd2;
-    memory[4] = 32'd0;
-    memory[5] = 32'd0;
-    memory[6] = 32'd1;
-    memory[7] = 32'd2;
-    memory[8] = 32'd0;
-    memory[9] = 32'd0;
-    memory[10] = 32'd3;
-    memory[11] = 32'd4;
-    memory[12] = 32'd0;
-    memory[13] = 32'd0;
-    memory[14] = 32'd0;
-    memory[15] = 32'd0;
-    memory[16] = 32'd0;
-    memory[17] = 32'd0;
-    memory[18] = 32'd0;
-    memory[19] = 32'd0;
-    memory[20] = 32'd1;
-    memory[21] = 32'd2;
-    memory[22] = 32'd3;
-    memory[23] = 32'd4;
+         for(i=0; i < 1023; i=i+1)
+                memory[i] = 0;
+                
+               /*memory[0] = 32'h0;
+                memory[1] = 32'h1;
+                memory[2] = 32'h2;
+                memory[3] = 32'h3;
+                memory[4] = 32'h4;
+                memory[5] = -32'h1;*/
+                
+                
+                memory[0] = 32'd100;
+                memory[1] = 32'd200;
+                memory[2] = 32'd300;
+                memory[3] = 32'd400;
+                memory[4] = 32'd500;
+                memory[5] = 32'd600;
+                memory[6] = 32'd700;
+                memory[7] = 32'd800;
+                memory[8] = 32'd900;
+                memory[9] = 32'd1000;
+                memory[10] = 32'd1100;
+                memory[11] = 32'd1200;
 
-
+   
         
     end
     

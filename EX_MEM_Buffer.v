@@ -23,19 +23,19 @@
 module EX_MEM_Buffer(instruction_in, ReadData2_in, hilowrite_in, WriteReg_in,
                      RegWrite_in, nowrite_in, MemWrite_in, MemRead_in, Clk,
                      instruction_out, ReadData2_out, hilowrite_out, WriteReg_out,
-                     RegWrite_out, nowrite_out, MemWrite_out, MemRead_out, stall_in, stall_out);
+                     RegWrite_out, nowrite_out, MemWrite_out, MemRead_out, IF_Stall_in, IF_Stall_out);
 
     input [31:0] ReadData2_in, instruction_in, hilowrite_in;
     
     input [4:0] WriteReg_in;
 
-    input RegWrite_in, nowrite_in, MemWrite_in, MemRead_in, Clk, stall_in;
+    input RegWrite_in, nowrite_in, MemWrite_in, MemRead_in, Clk, IF_Stall_in;
 
     output reg [31:0] instruction_out, ReadData2_out, hilowrite_out;
     
     output reg [4:0] WriteReg_out;
 
-    output reg RegWrite_out, nowrite_out, MemWrite_out, MemRead_out, stall_out;
+    output reg RegWrite_out, nowrite_out, MemWrite_out, MemRead_out, IF_Stall_out;
 
     initial begin
     
@@ -45,8 +45,8 @@ module EX_MEM_Buffer(instruction_in, ReadData2_in, hilowrite_in, WriteReg_in,
         MemRead_out = 0;
         RegWrite_out = 0;
         nowrite_out = 0;
-        stall_out = 0;
         MemWrite_out = 0;
+        IF_Stall_out = 0;
         
     end
 
@@ -55,7 +55,7 @@ module EX_MEM_Buffer(instruction_in, ReadData2_in, hilowrite_in, WriteReg_in,
         instruction_out <= instruction_in;
         ReadData2_out <= ReadData2_in;
         hilowrite_out <= hilowrite_in;
-        stall_out <= stall_in;
+        IF_Stall_out <= IF_Stall_in;
 
         WriteReg_out <= WriteReg_in;
         
